@@ -21,49 +21,34 @@ func main() {
 	total := 0
 
 	for scanner.Scan() {
-		total += getValidGameId(scanner.Text())
+		total += powerOfMinCubes(scanner.Text())
 	}
 
 	fmt.Println(total)
 }
 
-func getValidGameId(line string) int {
-	split := strings.Split(line, ": ")
+func powerOfMinCubes(line string) int {
+	game := strings.Split(line, ": ")[1]
 
-	// Get GameId from splitted line
-	gameId, _ := strconv.Atoi(strings.Split(split[0], " ")[1])
+	minBallsCount := make(map[string]int)
 
-	if isValidGame(split[1]) {
-		return gameId
-	}
+	fillMinBallsCount(game, &minBallsCount)
 
-	return 0
+	return minBallsCount["red"] * minBallsCount["green"] * minBallsCount["blue"]
 }
 
-// 12 red cubes, 13 green cubes and 14 blue cubes
-func isValidGame(gameStr string) bool {
-	game := strings.Split(gameStr, "; ")
+func fillMinBallsCount(game string, minBallsCount *map[string]int) {
 
-	for _, sets := range game {
-		if !isSetPossible(sets) {
-			return false
+	for _, set := range strings.Split(game, "; ") {
+		for _, pick := range strings.Split(set, ", ") {
+			ballCount := strings.Split(pick, " ")
+			num, _ := strconv.Atoi(ballCount[0])
+			ball := ballCount[1]
+
+			// Store the maximum number of balls got at any picks
+			if (*minBallsCount)[ball] < num {
+				(*minBallsCount)[ball] = num
+			}
 		}
 	}
-	return true
-}
-
-func isSetPossible(sets string) bool {
-	mapOfValidSets := map[string]int{"red": 12, "blue": 14, "green": 13}
-	for _, set := range strings.Split(sets, ", ") {
-		pick := strings.Split(set, " ")
-
-		// Check if the number of balls is within the valid range
-		count, _ := strconv.Atoi(pick[0])
-		ball := pick[1]
-
-		if count > mapOfValidSets[ball] {
-			return false
-		}
-	}
-	return true
 }
